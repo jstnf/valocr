@@ -153,7 +153,11 @@ public class ValOCR {
                 } else break;
             }
 
-            return Integer.parseInt(result);
+            try {
+                return Integer.parseInt(result);
+            } catch (Exception ignored) {
+                return -1; // Incase of integer overflow
+            }
         }
 
         return -1;
