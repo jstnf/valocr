@@ -10,6 +10,7 @@ public class SerialTerminal {
     private boolean connecting;
     private boolean connected;
     private long lastHandshakeTimestamp;
+    private CallbackResult lastHandshake;
 
     public SerialTerminal() {
         this.port = "COM1"; // Default value, needs to be changed in GUI
@@ -34,15 +35,15 @@ public class SerialTerminal {
 
         // Now, initialize and attempt handshake to determine if this is correct port
         System.out.println("Attempting handshake (will check again for handshake in 5 seconds)!");
-        CallbackResult result = new CallbackResult();
-        initiateHandshakeListeners(serialPort, result);
+        lastHandshake = new CallbackResult();
+        initiateHandshakeListeners(serialPort, lastHandshake);
         serialPort.writeBytes(new byte[]{ 0x69 }, 1);
 
         // Wait 5s for data
         try {
             Thread.sleep(5000);
-            if (!result.getReceived().get() || !result.getWritten().get()) {
-                System.out.println("Handshake failed! (" + result.getWritten().get() + ", " + result.getReceived().get() + ") Attempting to close port. Please try testing connection again.");
+            if (!lastHandshake.getReceived().get() || !lastHandshake.getWritten().get()) {
+                System.out.println("Handshake failed! (" + lastHandshake.getWritten().get() + ", " + lastHandshake.getReceived().get() + ") Attempting to close port. Please try testing connection again.");
                 if (!serialPort.closePort()) {
                     System.out.println("Could not close port!");
                 }
@@ -140,6 +141,10 @@ public class SerialTerminal {
 
     public long getLastHandshakeTimestamp() {
         return lastHandshakeTimestamp;
+    }
+
+    public CallbackResult getLastHandshake() {
+        return lastHandshake;
     }
 
     public void setPort(String port) {

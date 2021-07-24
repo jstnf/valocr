@@ -2,6 +2,7 @@ package dev.justinf.valocr;
 
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract1;
+import net.sourceforge.tess4j.TesseractException;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -72,8 +73,8 @@ public class ValOCR {
                 lastDeathImage = robot.createScreenCapture(deathRegion);
 
                 try {
-                    // lastDeathInput = tesseract.doOCR(lastDeathImage);
-                    // lastHealthInput = tesseract.doOCR(lastHealthImage);
+                    lastDeathInput = tesseract.doOCR(lastDeathImage);
+                    lastHealthInput = tesseract.doOCR(lastHealthImage);
 
                     window.update();
 
@@ -132,8 +133,7 @@ public class ValOCR {
                             System.out.println("SHOOT!! You're probably dead.");
                         }
                     }
-                // } catch (TesseractException | InterruptedException e) {
-                } catch (InterruptedException e) {
+                } catch (TesseractException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }

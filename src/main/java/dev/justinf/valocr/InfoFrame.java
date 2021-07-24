@@ -40,11 +40,11 @@ public class InfoFrame {
     private JLabel infoPanelTitleLabel;
     private JPanel connectionInfoPanel;
     private JLabel connectionInfoPanelTitleLabel;
-    private JLabel isConnectedLabel;
-    private JPanel isConnectedPanel;
+    private JLabel connectionTestStatusLabel;
+    private JPanel connectionTestStatusPanel;
     private JPanel sinceLastHandshakePanel;
     private JLabel sinceLastHandshakeLabel;
-    private JTextField isConnectedTextField;
+    private JTextField writeTestTextField;
     private JTextField sinceLastHandshakeTextField;
     private JTextField serialPortTextField;
     private JButton connectButton;
@@ -52,6 +52,7 @@ public class InfoFrame {
     private JPanel currentSerialPortPanel;
     private JLabel currentSerialPortLabel;
     private JTextField currentSerialPortTextField;
+    private JTextField receiveTestTextField;
 
     public InfoFrame(ValOCR app) {
         this.app = app;
@@ -105,14 +106,19 @@ public class InfoFrame {
         }
 
         if (app.getSerialTerminal().isConnecting()) {
-            isConnectedTextField.setText("Connecting...");
-            isConnectedTextField.setBackground(_YELLOW);
+            writeTestTextField.setBackground(_YELLOW);
+            receiveTestTextField.setBackground(_YELLOW);
         } else {
-            isConnectedTextField.setText(app.getSerialTerminal().isConnected() + "");
-            if (app.getSerialTerminal().isConnected()) {
-                isConnectedTextField.setBackground(_GREEN);
+            if (app.getSerialTerminal().getLastHandshake() != null && app.getSerialTerminal().getLastHandshake().getWritten().get()) {
+                writeTestTextField.setBackground(_GREEN);
             } else {
-                isConnectedTextField.setBackground(_RED);
+                writeTestTextField.setBackground(_RED);
+            }
+
+            if (app.getSerialTerminal().getLastHandshake() != null && app.getSerialTerminal().getLastHandshake().getReceived().get()) {
+                receiveTestTextField.setBackground(_GREEN);
+            } else {
+                receiveTestTextField.setBackground(_RED);
             }
         }
 
