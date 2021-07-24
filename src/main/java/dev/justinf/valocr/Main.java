@@ -1,7 +1,8 @@
 package dev.justinf.valocr;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import java.awt.AWTException;
 
 public class Main {
 

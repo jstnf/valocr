@@ -2,10 +2,12 @@ package dev.justinf.valocr;
 
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract1;
-import net.sourceforge.tess4j.TesseractException;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+import java.awt.AWTException;
+import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.image.BufferedImage;
 
 public class ValOCR {
@@ -26,6 +28,7 @@ public class ValOCR {
 
     private static final String TESSERACT_DATAPATH = "C:/TesseractDataset/tessdata/";
 
+    private final SerialTerminal serialTerminal;
     private final Robot robot;
     private final ITesseract tesseract;
     private final InfoFrame window;
@@ -45,7 +48,10 @@ public class ValOCR {
     private String lastHealthInput = "";
     private String lastDeathInput = "";
 
+    private Thread connectionThread;
+
     public ValOCR() throws AWTException {
+        serialTerminal = new SerialTerminal();
         robot = new Robot();
         tesseract = new Tesseract1();
         window = new InfoFrame(this);
@@ -66,8 +72,8 @@ public class ValOCR {
                 lastDeathImage = robot.createScreenCapture(deathRegion);
 
                 try {
-                    lastDeathInput = tesseract.doOCR(lastDeathImage);
-                    lastHealthInput = tesseract.doOCR(lastHealthImage);
+                    // lastDeathInput = tesseract.doOCR(lastDeathImage);
+                    // lastHealthInput = tesseract.doOCR(lastHealthImage);
 
                     window.update();
 
@@ -98,7 +104,8 @@ public class ValOCR {
 
                         // The safe code
                         validTicks++;
-                        if (validTicks < 3) continue;
+                        if (validTicks < 3)
+                            continue;
                         invalidTicks = 0;
                         if (processed == lastHealth) {
                             sameHealthTicks++;
@@ -125,13 +132,15 @@ public class ValOCR {
                             System.out.println("SHOOT!! You're probably dead.");
                         }
                     }
-                } catch (TesseractException | InterruptedException e) {
+                // } catch (TesseractException | InterruptedException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         });
 
         updateThread.start();
+        testConnection();
 
         JFrame frame = new JFrame("ValOCR");
         frame.setContentPane(window.getMainPanel());
@@ -163,7 +172,19 @@ public class ValOCR {
         return -1;
     }
 
+    public void testConnection() {
+        if (connectionThread != null && connectionThread.isAlive()) connectionThread.interrupt();
+        connectionThread = new Thread(() -> {
+            window.atomicallySetConnectionResult((serialTerminal.establishConnection()));
+        });
+        connectionThread.start();
+    }
+
     /* getset */
+    public SerialTerminal getSerialTerminal() {
+        return serialTerminal;
+    }
+
     public Rectangle getHealthRegion() {
         return healthRegion;
     }
