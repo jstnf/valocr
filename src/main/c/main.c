@@ -11,11 +11,29 @@
 #include "usart.h"
 
 int main(void) {
+	DDRB = 0x07; PORTB = 0x00;
 	USART_Init(MYUBRR);
 	
     while (1) {
 		// TODO
-		USART_Transmit(USART_Receive());
+		unsigned char data = USART_Receive();
+		switch (data) {
+			case 0x00:
+				PORTB = 0x01;
+				break;
+			case 0x01:
+				PORTB = 0x02;
+				break;
+			case 0x02:
+				PORTB = 0x04;
+				break;
+			case 0x69:
+				PORTB = 0x05;
+				break;
+			default:
+				PORTB = 0x00;
+				break;
+		}
     }
 	
 	return 1;

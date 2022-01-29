@@ -1,9 +1,7 @@
 package dev.justinf.valocr;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,6 +49,11 @@ public class InfoFrame {
     private JPanel currentSerialPortPanel;
     private JLabel currentSerialPortLabel;
     private JTextField currentSerialPortTextField;
+    private JLabel consolePanelTitleLabel;
+    private JPanel consolePanel;
+    private JTextArea consoleTextArea;
+    private JScrollPane consoleScrollPane;
+    private JButton doSomethingButton;
 
     public InfoFrame(ValOCR app) {
         this.app = app;
@@ -59,6 +62,14 @@ public class InfoFrame {
             app.getSerialTerminal().setPort(serialPortTextField.getText());
             app.testConnection();
         });
+        doSomethingButton.addActionListener(e -> {
+            byte random = (byte) ((int) (Math.random() * 3));
+            app.getSerialTerminal().write(random);
+            app.log("Sent " + random + " to " + app.getSerialTerminal().getPort() + "!");
+        });
+
+        // Auto-scroll console text area
+        ((DefaultCaret) consoleTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
     }
 
     public void update() {
@@ -108,6 +119,10 @@ public class InfoFrame {
         } else {
             sinceLastHandshakeTextField.setText("" + (System.currentTimeMillis() - app.getSerialTerminal().getLastHandshakeTimestamp()));
         }
+    }
+
+    public JTextArea getConsoleTextArea() {
+        return consoleTextArea;
     }
 
     /* getset */

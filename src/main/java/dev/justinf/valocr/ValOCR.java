@@ -4,8 +4,7 @@ import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract1;
 import net.sourceforge.tess4j.TesseractException;
 
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.Robot;
@@ -52,7 +51,7 @@ public class ValOCR {
     private Thread connectionThread;
 
     public ValOCR() throws AWTException {
-        serialTerminal = new SerialTerminal();
+        serialTerminal = new SerialTerminal(this);
         robot = new Robot();
         tesseract = new Tesseract1();
         window = new InfoFrame(this);
@@ -79,8 +78,9 @@ public class ValOCR {
                     window.update();
 
                     if (lastDeathInput.toLowerCase().contains("switch") || lastDeathInput.toLowerCase().contains("player")) {
-                        System.out.println("Death detected!");
-                        System.out.println("Pausing OCR for 5 seconds!");
+                        log("Death detected!");
+                        log("Pausing OCR for 5 seconds!");
+                        shoot();
                         Thread.sleep(5000);
                         continue;
                     }
@@ -92,11 +92,12 @@ public class ValOCR {
                         if (SUPER_HYPER_SENSITIVE_DANGER_MODE) {
                             lastHealth = processed;
                             if (lastHealth < currentHealth) {
-                                System.out.println("SHOOT! You took damage! [" + currentHealth + " -> " + lastHealth + "]");
+                                log("SHOOT! You took damage! [" + currentHealth + " -> " + lastHealth + "]");
+                                shoot();
                             } else if (lastHealth == currentHealth) {
                                 // System.out.println("Your health stayed the same! [" + currentHealth + "]");
                             } else {
-                                System.out.println("You healed! [" + currentHealth + "->" + lastHealth + "]");
+                                log("You healed! [" + currentHealth + "->" + lastHealth + "]");
                             }
 
                             currentHealth = lastHealth;
@@ -112,11 +113,12 @@ public class ValOCR {
                             sameHealthTicks++;
                             if (sameHealthTicks > 1) {
                                 if (lastHealth < currentHealth) {
-                                    System.out.println("SHOOT! You took damage! [" + currentHealth + " -> " + lastHealth + "]");
+                                    log("SHOOT! You took damage! [" + currentHealth + " -> " + lastHealth + "]");
+                                    shoot();
                                 } else if (lastHealth == currentHealth) {
                                     // System.out.println("Your health stayed the same! [" + currentHealth + "]");
                                 } else {
-                                    System.out.println("You healed! [" + currentHealth + "->" + lastHealth + "]");
+                                    log("You healed! [" + currentHealth + "->" + lastHealth + "]");
                                 }
 
                                 currentHealth = lastHealth;
@@ -130,12 +132,15 @@ public class ValOCR {
                         validTicks = 0;
                         invalidTicks++;
                         if (invalidTicks == 8) {
-                            System.out.println("SHOOT!! You're probably dead.");
+                            log("SHOOT!! You're probably dead.");
+                            shoot();
                         }
                     }
                 } catch (TesseractException | InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                Thread.yield();
             }
         });
 
@@ -178,6 +183,17 @@ public class ValOCR {
             window.atomicallySetConnectionResult((serialTerminal.establishConnection()));
         });
         connectionThread.start();
+    }
+
+    private void shoot() {
+        if (serialTerminal.isConnected()) {
+            serialTerminal.write((byte) ((int) (Math.random() * 4)));
+        }
+    }
+
+    public void log(String message) {
+        System.out.println(message);
+        window.getConsoleTextArea().append("\n" + message);
     }
 
     /* getset */
